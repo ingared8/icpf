@@ -33,6 +33,8 @@ trait FractionT {
   def != (f:FractionT):Boolean = !(this == f)
   def > (f:FractionT):Boolean
   def < (f:FractionT):Boolean
+  def >= (f:FractionT):Boolean = (this > f) || (this == f)
+  def <= (f:FractionT):Boolean = (this < f) || (this == f)
 
   def + (i:Int):FractionT
   def - (i:Int):FractionT
@@ -42,6 +44,9 @@ trait FractionT {
   def == (i:Int):Boolean
   def > (i:Int):Boolean
   def < (i:Int):Boolean
+  def != (i:Int):Boolean = !(this == i)
+  def >= (i:Int):Boolean = (this > i) || (this == i)
+  def <= (i:Int):Boolean = (this < i) || (this == i)
 
   def inverse:FractionT
   def negate:FractionT

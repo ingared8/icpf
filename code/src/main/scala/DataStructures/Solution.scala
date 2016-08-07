@@ -22,7 +22,18 @@ trait SolutionT {
 
 case class Solution(srcPositions: Seq[PointT], facets: Seq[FacetT], destPositions:Seq[PointT]) extends SolutionT
 
+trait SolutionPointsT {
 
+  val srcPositions : Seq[PointT]
+  val facets : Seq[PolygonT]
+  val destPositions: Seq[PointT]
+
+}
+
+case class SolutionPoints(srcPositions: Seq[PointT], facets: Seq[PolygonT], destPositions:Seq[PointT]) extends SolutionPointsT
+
+
+/*
 object ProblemSolutionPrintTest extends App {
 
   val addr = "input.txt"
@@ -56,3 +67,4 @@ object ProblemSolutionPrintTest extends App {
   println("*********************")
 
 }
+*/

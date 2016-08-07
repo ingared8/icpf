@@ -15,7 +15,7 @@ trait SkeletonT {
 
 }
 
-case class Skeleton(edges: List[EdgeT]) extends SkeletonT {}
+case class Skeleton(edges: Seq[EdgeT]) extends SkeletonT {}
 
 
 

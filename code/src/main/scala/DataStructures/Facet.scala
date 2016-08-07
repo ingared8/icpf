@@ -4,18 +4,27 @@ package DataStructures
   * Created by greddy on 8/5/16.
   */
 
-trait FacetT {
 
-  val edges: Seq[Int]
+trait FacetT  {
+
+  val verticesIndex: Seq[Int]
 
   override def toString:String = {
-    edges.size + " " +  edges.map(_.toString).mkString(" ")
+    verticesIndex.size + " " +  verticesIndex.map(_.toString).mkString(" ")
+  }
+
+  def getVertexIndex(p: PointT, points:Seq[PointT]):Int = points.indexOf(p)
+
+  def getVertexIndex(points:Seq[PointT],pointsDict:Seq[PointT]):Seq[Int] =
+      points.map(p => getVertexIndex(p,pointsDict))
+
+  def getPolygon(pointsDict:Seq[PointT]):Polygon = {
+    Polygon(verticesIndex.map(x => pointsDict(x)))
   }
 
 }
 
-case class Facet(edges:Seq[Int])  extends FacetT
-
+case class Facet(verticesIndex:Seq[Int]) extends FacetT
 
 object FacetExample extends App {
 

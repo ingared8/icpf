@@ -1,5 +1,7 @@
 package DataStructures
 
+//import DataStructures.Geometry.LineFunction
+
 /**
   * Created by greddy on 8/5/16.
   */
@@ -17,6 +19,10 @@ trait EdgeT {
   val q:PointT
 
   override def toString:String = p.toString + " " + q.toString
+
+  def reverse:EdgeT = Edge(q,p)
+
+  def distanceSquare:FractionT = this.p.distance(this.q)
 
   def slope:FractionT = {
     //TODO Consider negative and positive infinites
@@ -71,11 +77,21 @@ trait EdgeT {
   def areaOfTriangle(a: PointT,b:PointT,c:PointT):FractionT =
     (a.x * (b.y - c.y ) + b.x *(c.y - a.y) + c.x *(a.y - b.y)) / 2
 
+  def getNodes(edges:Seq[EdgeT]):Seq[PointT] = {
+    val aa = edges.map{ case Edge(a,b) => a}.toList
+    val bb = edges.map{ case Edge(a,b) => b}.toList
+    (aa ::: bb).distinct
+  }
+
   def pointLiesOnEdge(point: PointT):Boolean = areaOfTriangle(point).num == 0
 
-  def neighbors(edges: Seq[EdgeT]):Seq[(EdgeT,FractionT)] =
+  def neighborEdges(edges: Seq[EdgeT]):Seq[(EdgeT,FractionT)] =
     edges.filter( x => (x.p == this.p) || (x.q == this.q) || (x.p == this.q) || (x.q == this.q))
-      .map{ x => (x,slopeDiff(x))}
+      .map{ x => (x,slopeDiff(x))}.filterNot(edge => this.p == edge._1. && this.q == edge.q)
+
+  def neighborNodes(node:PointT, edges: Seq[EdgeT]):Seq[PointT] =
+    edges.filter( x => x.p == node).map(x => x.p).union(
+    edges.filter(x => x.q == node).map(x => x.q)).distinct.filterNot(x => x == node)
 
   def pointsOnOppositeSide(point1: PointT, point2: PointT) =
     areaOfTriangle(point1)*areaOfTriangle(point2) < 0
@@ -86,8 +102,27 @@ trait EdgeT {
 
   def doesIntersect(edge: EdgeT):Boolean = isParallel(edge)
 
-  //   assert(!e1.doesIntersect(e2),"Edges should not be parallel")
+  def makeLine(p1: PointT, p2: PointT) : LineFunction = {
+    val slope = (p1.y - p2.y) / (p1.x - p2.x)
+    val intersect = p1.y - (slope * p1.x)
+    LineFunction(slope, intersect)
+  }
+
+  def makeLine(edge: EdgeT) : LineFunction = {
+    LineFunction(this.slope, this.intercept)
+  }
+
+  def makeNormalLine(p1: PointT, p2: PointT) : LineFunction = {
+    val func = makeLine(p1, p2)
+    val center = Point((p1.x+p2.x)/2, (p1.y+p2.y)/2)
+    val slope = FractionPointCoordinate(-1, 1) / func.slope
+    val intersect = center.y - (center.x * slope)
+    LineFunction(slope, intersect)
+  }
+
+  //   Edges should not be parallel
   def intersect(e1:EdgeT,e2:EdgeT):PointT = {
+      assert(!e1.doesIntersect(e2),"Edges should not be parallel")
 
       val (p1,q1,p2,q2) = (e1.p,e1.q,e2.p,e2.q)
       val (x1,y1,x2,y2,x3,y3,x4,y4) = (p1.x,p1.y,q1.x,q1.y,p2.x,p2.y,q2.x,q2.y)
@@ -104,18 +139,31 @@ trait EdgeT {
     val a = this.slope
     val b = this.intercept
     val (x1,y1)  = (point.x,point.y)
-    val x2 = x1 +    ((y1 + x1/(a -b))/(a + a.inverse) - x1)*2
-    val y2 = y1 +  a*(y1 + x1/(a -b))*2  /  ( a + a.inverse + b - y1)
+    val x2 = x1 + ((y1 + x1/(a -b))/(a + a.inverse) - x1)*2
+    val y2 = y1 + (a*(y1 + x1/(a -b))/(a + a.inverse) + b - y1)*2
     Point(x2,y2)
   }
 
+  def mirrorImageOfSeqOfPoints(points: Seq[PointT]):Seq[PointT] = {
+    val a = this.slope
+    val b = this.intercept
+
+    def getMirrorImage(point: PointT): PointT ={
+      val (x1,y1)  = (point.x,point.y)
+      val x2 = x1 + ((y1 + x1/(a -b))/(a + a.inverse) - x1)*2
+      val y2 = y1 + (a*(y1 + x1/(a -b))/(a + a.inverse) + b - y1)*2
+      Point(x2,y2)
+    }
+
+    points.map(p => getMirrorImage(p))
+
+  }
 
 }
 
+case class Edge(p:PointT,q:PointT) extends EdgeT
 
-case class Vertex(p:Point,q:Point) extends EdgeT
-
-case class Edge(p:Point,q:Point) extends EdgeT
+case class LineFunction(slope: FractionT, intersect: FractionT) {}
 
 
 object EdgeExamples extends App {
@@ -138,8 +186,14 @@ object EdgeExamples extends App {
 
   val f9 = FractionPointCoordinate(0,1)
   val f10 = FractionPointCoordinate(-1,1)
-  val point5 = Point(f9,f9) // (1,2)
-  val point6 = Point(f10,f10)
+  val f11 = FractionPointCoordinate(-2,8)
+  val f12 = FractionPointCoordinate(-3,137)
+  val point5 = Point(f9,f9) // (0,0)
+  val point6 = Point(f10,f10) // (-1,-1)
+
+  val point8 = Point(f9,f5) // (0,2)
+  val point9 = Point(f5,f9)
+  val point10 = Point(f11,f12)
 
   val edge = Edge(point,point2)   // 45 degree
   val edge1 = Edge(point,point3) // x -axis
@@ -152,7 +206,6 @@ object EdgeExamples extends App {
   //println("Slopes ", edge.slope, edge1.slope, edge2.slope)
 
   // SlopeDiff (tan(a-b))
-  /*
   println( edge.slope)
   println(edge2.slope )
   println(edge.slope * edge2.slope + 1)
@@ -175,7 +228,7 @@ object EdgeExamples extends App {
   println(" Diff of Fractions is ", edge2.slope - edge.slope )
   println(" Diff of Fractions is ", edge.slope - edge1.slope )
   println(" Diff of Fractions is ", edge1.slope - edge.slope )
-  */
+
   //println("SlopeDiff", edge.slopeDiff(edge), edge.slopeDiff(edge2), edge1.slopeDiff(edge2), edge2.slopeDiff(edge1))
 
   //Area of the traingle
@@ -194,7 +247,7 @@ object EdgeExamples extends App {
   // Point Lies on Edge
   println("Point ", edge.pointLiesOnEdge(point2), edge.pointLiesOnEdge(point4))
 
-  val n1 = edge.neighbors(List(edge2,edge1,edge3 ))
+  val n1 = edge.neighborEdges(List(edge2,edge1,edge3 ))
   println(n1)
 
   // Intersection point of lines
@@ -203,7 +256,11 @@ object EdgeExamples extends App {
 
   println("Intercept of x_axis" , edge.intercept, edge1.intercept, edge2.intercept)
 
-  println("Mirror Images of points ", edge.mirrorImageOfPoint(point3),edge.mirrorImageOfPoint(point4))
+  println("Mirror Images of points ", edge.mirrorImageOfPoint(point3),edge.mirrorImageOfPoint(point4),
+    edge.mirrorImageOfPoint(point6), edge.mirrorImageOfPoint(point8), edge.mirrorImageOfPoint(point9),
+    edge.mirrorImageOfPoint(point10))
+
+  println("Reverse Edge of edge1", edge, edge.reverse)
 
 }
 
