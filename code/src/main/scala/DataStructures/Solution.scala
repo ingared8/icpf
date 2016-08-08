@@ -28,6 +28,14 @@ trait SolutionPointsT {
   val facets : Seq[PolygonT]
   val destPositions: Seq[PointT]
 
+  override def toString:String = {
+    srcPositions.length + "\n" +
+      srcPositions.map(_.toString).mkString("\n") + "\n" +
+      facets.length + "\n" +
+      facets.map(_.toString).mkString("\n") + "\n" +
+      destPositions.map(_.toString).mkString("\n")
+  }
+
 }
 
 case class SolutionPoints(srcPositions: Seq[PointT], facets: Seq[PolygonT], destPositions:Seq[PointT]) extends SolutionPointsT

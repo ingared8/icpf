@@ -87,11 +87,11 @@ trait EdgeT {
 
   def neighborEdges(edges: Seq[EdgeT]):Seq[(EdgeT,FractionT)] =
     edges.filter( x => (x.p == this.p) || (x.q == this.q) || (x.p == this.q) || (x.q == this.q))
-      .map{ x => (x,slopeDiff(x))}.filterNot(edge => this.p == edge._1. && this.q == edge.q)
+      .map{ x => (x,slopeDiff(x))}.filterNot{case (edge,_) => this.p == edge.p  && this.q == edge.q}
 
   def neighborNodes(node:PointT, edges: Seq[EdgeT]):Seq[PointT] =
-    edges.filter( x => x.p == node).map(x => x.p).union(
-    edges.filter(x => x.q == node).map(x => x.q)).distinct.filterNot(x => x == node)
+    edges.filter( x => x.p == node).map(x => x.q).union(
+    edges.filter(x => x.q == node).map(x => x.p)).distinct.filterNot(x => x == node)
 
   def pointsOnOppositeSide(point1: PointT, point2: PointT) =
     areaOfTriangle(point1)*areaOfTriangle(point2) < 0
@@ -156,7 +156,6 @@ trait EdgeT {
     }
 
     points.map(p => getMirrorImage(p))
-
   }
 
 }

@@ -64,9 +64,9 @@ case class FractionPointCoordinate(num:Int, den:Int) extends FractionT {
   override def < (f:FractionT):Boolean = (this - f).reduce.num < 0
   override def == (f:FractionT):Boolean = (this - f).reduce.num == 0
 
-  override def > (i:Int):Boolean = false
-  override def < (i:Int):Boolean = false
-  override def == (i:Int):Boolean = false
+  override def > (i:Int):Boolean = this > FractionPointCoordinate(i,1)
+  override def < (i:Int):Boolean = this < FractionPointCoordinate(i,1)
+  override def == (i:Int):Boolean = this == FractionPointCoordinate(i,1)
 
 }
 /*

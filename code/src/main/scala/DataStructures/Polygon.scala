@@ -71,6 +71,14 @@ PolygonT {
     Edge(this.vertices.head, this.vertices.tail.head)
   }
 
+
+  def mirrorImage: PolygonT = {
+    val p = this.vertices.head
+    val q = this.vertices.tail.head
+
+     Polygon(p::q :: Edge(p,q).mirrorImageOfSeqOfPoints(this.vertices.tail.tail).toList)
+  }
+
 }
 
 case class Polygon(vertices: Seq[PointT]) extends PolygonT {}
